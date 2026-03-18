@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }} Lessons | SkillDrop{% endblock %}
+
+{% block content %}
+{% set theme = category_themes.get(category.name, {}) %}
+<section class="detail-hero {{ theme.accent }}">
+    <div class="reveal">
+        <a class="back-link" href="{{ url_for('home') }}#categories">Back to categories</a>
+        <span class="eyebrow">Category</span>
+        <h1>{{ category.icon }} {{ category.name }}</h1>
+        <p>{{ theme.description }}</p>
+    </div>
+    <div class="detail-hero-card reveal">
+        <strong>{{ category.lessons|length }}</strong>
+        <span>Lessons ready now</span>
+    </div>
+</section>
+
+<section class="section">
+    <div class="lesson-list">
+        {% for lesson in category.lessons %}
+            <article class="lesson-row reveal">
+                <div>
+                    <span class="pill">{{ lesson.duration }}</span>
+                    <h2>{{ lesson.title }}</h2>
+                    <ul class="tick-list">
+                        {% for step in lesson.steps[:3] %}
+                            <li>{{ step }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="lesson-row-actions">
+                    {% if lesson.id in completed_ids %}
+                        <span class="pill success">Completed</span>
+                    {% endif %}
+                    <a class="button button-primary js-ripple" href="{{ url_for('lesson_detail', lesson_id=lesson.id) }}">Open Lesson</a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ lesson.title }} | SkillDrop{% endblock %}
+
+{% block content %}
+<section class="lesson-detail-shell">
+    <article class="lesson-detail-card reveal">
+        <a class="back-link" href="{{ url_for('category_detail', category_id=lesson.category.id) }}">Back to {{ lesson.category.name }}</a>
+
+        <div class="lesson-detail-top">
+            <div>
+                <span class="pill">{{ lesson.category.icon }} {{ lesson.category.name }}</span>
+                <h1>{{ lesson.title }}</h1>
+                <p>Short, practical instructions for field work.</p>
+            </div>
+            <div class="duration-chip">{{ lesson.duration }}</div>
+        </div>
+
+        <ol class="step-list">
+            {% for step in lesson.steps %}
+                <li>{{ step }}</li>
+            {% endfor %}
+        </ol>
+
+        <div class="lesson-actions">
+            <button
+                type="button"
+                class="button button-secondary play-audio js-ripple"
+                data-title="{{ lesson.title }}"
+                data-language="{{ user.language_preference }}"
+                data-steps="{{ lesson.steps|join('||') }}"
+            >
+                ▶ Play Audio
+            </button>
+
+            <form class="complete-form" action="{{ url_for('complete_lesson', lesson_id=lesson.id) }}" method="post">
+                <button
+                    type="submit"
+                    class="button button-primary js-ripple"
+                    data-complete-button
+                    data-lesson-id="{{ lesson.id }}"
+                    {% if is_completed %}disabled{% endif %}
+                >
+                    {% if is_completed %}Completed{% else %}✔ Mark as Complete{% endif %}
+                </button>
+            </form>
+        </div>
+    </article>
+
+    <aside class="lesson-sidebar reveal">
+        <div class="side-card">
+            <span class="eyebrow">Progress</span>
+            <h3>Keep going</h3>
+            <div class="progress-track lg">
+                <div id="progressBarFill" class="progress-fill" style="width: {{ summary.percent }}%;"></div>
+            </div>
+            <div class="side-metrics">
+                <div>
+                    <strong id="completedCount">{{ summary.completed_count }}</strong>
+                    <span>Done</span>
+                </div>
+                <div>
+                    <strong id="progressPercent">{{ summary.percent }}%</strong>
+                    <span>Progress</span>
+                </div>
+                <div>
+                    <strong id="streakCount">{{ summary.streak }}</strong>
+                    <span>Streak</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-card accent-card {{ theme.accent }}">
+            <span class="eyebrow">Quick support</span>
+            <h3>Need help in simple language?</h3>
+            <p>Use the AI helper on the home page for fast answers in English or Hindi.</p>
+            <a class="button button-ghost" href="{{ url_for('home') }}#chatbot">Open AI Chat</a>
+        </div>
+    </aside>
+</section>
+{% endblock %}

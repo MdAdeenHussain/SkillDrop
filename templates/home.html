@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% block title %}SkillDrop | Learn Skills in 60 Seconds{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy reveal">
+        <span class="eyebrow">Fast learning for daily work</span>
+        <h1>Learn Skills in 60 Seconds</h1>
+        <p>
+            Short lessons for electricians, plumbers, drivers, and site workers.
+            Simple steps, local language support, and practical tips you can use today.
+        </p>
+
+        <div class="hero-actions">
+            <a href="#categories" class="button button-primary js-ripple">Start Learning</a>
+            <a href="#chatbot" class="button button-secondary">Ask AI</a>
+        </div>
+
+        <div class="hero-stats">
+            <div class="metric-card">
+                <strong>{{ summary.total_lessons }}</strong>
+                <span>Quick lessons</span>
+            </div>
+            <div class="metric-card">
+                <strong>{{ summary.completed_count }}</strong>
+                <span>Completed</span>
+            </div>
+            <div class="metric-card">
+                <strong>{{ summary.streak }} days</strong>
+                <span>Learning streak</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-visual reveal">
+        <div class="phone-mockup">
+            <div class="phone-top">
+                <span>Today</span>
+                <span>SkillDrop</span>
+            </div>
+            <div class="mini-card sun">
+                <div>
+                    <strong>Electrical Safety</strong>
+                    <p>45 sec lesson</p>
+                </div>
+                <span>⚡</span>
+            </div>
+            <div class="mini-card aqua">
+                <div>
+                    <strong>Fix a Tap</strong>
+                    <p>4 easy steps</p>
+                </div>
+                <span>🔧</span>
+            </div>
+            <div class="mini-progress">
+                <span>Daily progress</span>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: {{ summary.percent }}%;"></div>
+                </div>
+            </div>
+            <div class="mini-bubble">
+                <strong>AI Tip</strong>
+                <p>Ask in English or Hindi.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="categories" class="section">
+    <div class="section-heading reveal">
+        <span class="eyebrow">Categories</span>
+        <h2>Tap a skill and start learning</h2>
+    </div>
+
+    <div class="category-grid">
+        {% for category in categories %}
+            {% set theme = category_themes.get(category.name, {}) %}
+            <a href="{{ url_for('category_detail', category_id=category.id) }}" class="category-card reveal {{ theme.accent }}">
+                <div class="category-icon">{{ category.icon }}</div>
+                <div>
+                    <h3>{{ category.name }}</h3>
+                    <p>{{ theme.description }}</p>
+                </div>
+                <span class="pill">{{ category.lessons|length }} lessons</span>
+            </a>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section feature-band">
+    <div class="section-heading reveal">
+        <span class="eyebrow">Quick picks</span>
+        <h2>Micro-lessons built for busy shifts</h2>
+    </div>
+
+    <div class="lesson-strip">
+        {% for lesson in featured_lessons %}
+            <article class="lesson-card reveal">
+                <div class="lesson-card-top">
+                    <span class="pill">{{ lesson.category.icon }} {{ lesson.category.name }}</span>
+                    <span class="lesson-time">{{ lesson.duration }}</span>
+                </div>
+                <h3>{{ lesson.title }}</h3>
+                <ol class="mini-steps">
+                    {% for step in lesson.steps[:3] %}
+                        <li>{{ step }}</li>
+                    {% endfor %}
+                </ol>
+                <a class="button button-ghost" href="{{ url_for('lesson_detail', lesson_id=lesson.id) }}">Open Lesson</a>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section id="chatbot" class="section">
+    <div class="chat-layout">
+        <div class="chat-copy reveal">
+            <span class="eyebrow">Ask AI in Your Language</span>
+            <h2>Get simple help in seconds</h2>
+            <p>Type your problem like “How to fix a leaking tap?” and get short, clear steps.</p>
+
+            <div class="trust-list">
+                <div class="trust-pill">Simple language</div>
+                <div class="trust-pill">English / Hindi</div>
+                <div class="trust-pill">Step-by-step help</div>
+            </div>
+        </div>
+
+        <div class="chat-panel reveal">
+            <div class="chat-header">
+                <div>
+                    <strong>AI Work Helper</strong>
+                    <p>Simple answers for practical work</p>
+                </div>
+                <label class="language-toggle">
+                    <span>Language</span>
+                    <select id="languageSelect">
+                        {% for code, label in language_labels.items() %}
+                            <option value="{{ code }}" {% if code == user.language_preference %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+
+            <div id="chatMessages" class="chat-messages" aria-live="polite">
+                <div class="message assistant">
+                    <span class="message-role">SkillDrop AI</span>
+                    <p>Ask about leaks, wiring, punctures, site safety, and more.</p>
+                </div>
+            </div>
+
+            <form id="chatForm" class="chat-form">
+                <label class="sr-only" for="chatInput">Ask a question</label>
+                <input
+                    id="chatInput"
+                    name="question"
+                    type="text"
+                    placeholder="How to fix a leaking tap?"
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" class="button button-primary js-ripple">Ask AI</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section id="progress" class="section">
+    <div class="section-heading reveal">
+        <span class="eyebrow">Progress Tracker</span>
+        <h2>Keep your learning streak alive</h2>
+    </div>
+
+    <div class="progress-grid">
+        <article class="progress-card reveal">
+            <div class="progress-card-head">
+                <h3>{{ user.name }}</h3>
+                <span class="pill success">Active today</span>
+            </div>
+            <p>Your next 60 seconds can unlock one more practical skill.</p>
+            <div class="progress-stats">
+                <div>
+                    <strong id="completedCount">{{ summary.completed_count }}</strong>
+                    <span>Skills completed</span>
+                </div>
+                <div>
+                    <strong id="streakCount">{{ summary.streak }}</strong>
+                    <span>Day streak</span>
+                </div>
+                <div>
+                    <strong id="progressPercent">{{ summary.percent }}%</strong>
+                    <span>Progress</span>
+                </div>
+            </div>
+            <div class="progress-bar-wrap">
+                <div class="progress-track lg">
+                    <div id="progressBarFill" class="progress-fill" style="width: {{ summary.percent }}%;"></div>
+                </div>
+                <small>{{ summary.completed_count }} of {{ summary.total_lessons }} lessons done</small>
+            </div>
+        </article>
+
+        <article class="badge-card reveal">
+            <h3>Badges & Certificates</h3>
+            <div class="badge-list">
+                {% for badge in badges %}
+                    <div class="badge-item">
+                        <strong>{{ badge.title }}</strong>
+                        <span>{{ badge.detail }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </article>
+    </div>
+</section>
+
+<section class="section utility-grid">
+    <article class="utility-card reveal">
+        <span class="eyebrow">Offline mode</span>
+        <h3>Keep learning with weak internet</h3>
+        <p>Saved lessons and audio playback are ready for future offline support.</p>
+    </article>
+
+    <article class="utility-card reveal">
+        <span class="eyebrow">Job opportunities</span>
+        <h3>Work leads near you</h3>
+        <div class="job-list">
+            {% for job in jobs %}
+                <div class="job-item">
+                    <strong>{{ job.title }}</strong>
+                    <span>{{ job.location }}</span>
+                    <small>{{ job.pay }}</small>
+                </div>
+            {% endfor %}
+        </div>
+    </article>
+<\/section>
+{% endblock %}
